@@ -8,41 +8,74 @@ app.use(cors());
 app.use(express.json());
 
 // ============================================================
-// ROTA: GERAR QUESTÕES
+// BANCO LOCAL DE QUESTÕES (FALLBACK)
+// ============================================================
+const QUESTAO_LOCAL = [
+    { c: "historia", s: "O Maranhão foi colonizado por portugueses e franceses.", a: true,
+        j: "Correto. O Maranhão teve colonização francesa e portuguesa." },
+    { c: "historia", s: "São Luís foi fundada por portugueses em 1612.", a: false,
+        j: "Errado. Foi fundada pelos franceses em 1612." },
+    { c: "historia", s: "A 'Balaiada' foi uma revolta popular no Maranhão entre 1838 e 1841.", a: true,
+        j: "Correto. A Balaiada foi uma das maiores revoltas do período regencial." },
+    { c: "legislacao", s: "A segurança pública é dever do Estado, direito e responsabilidade de todos (CF/88).", a: true,
+        j: "Correto. Art. 144 da Constituição Federal." },
+    { c: "legislacao", s: "O porte de arma é permitido para maiores de 21 anos.", a: false,
+        j: "Errado. O Estatuto do Desarmamento exige 25 anos." },
+    { c: "portugues", s: "Na frase 'Os alunos estudaram para a prova', o sujeito é simples.", a: true,
+        j: "Correto. 'Os alunos' é o sujeito simples." },
+    { c: "portugues", s: "Em 'Fazem dois anos que não o vejo', o verbo 'fazer' está corretamente flexionado no plural.",
+        a: false, j: "Errado. O verbo 'fazer' indicando tempo decorrido é impessoal: 'Faz dois anos'." },
+    { c: "seguranca", s: "Vírus e worms são tipos de malware que podem infectar computadores.", a: true,
+        j: "Correto. Vírus e worms são pragas virtuais." },
+    { c: "seguranca", s: "Firewall e antivírus realizam exatamente a mesma função de proteção.", a: false,
+        j: "Errado. Firewall controla tráfego de rede; antivírus detecta malwares." },
+    { c: "cloud", s: "Computação em nuvem permite acesso sob demanda a recursos computacionais pela internet.",
+        a: true, j: "Correto. Essa é a definição de cloud computing." },
+    { c: "cloud", s: "A computação em nuvem elimina totalmente a necessidade de conexão com a internet.", a: false,
+        j: "Errado. O acesso a recursos em nuvem depende de conexão com a internet." }
+];
+
+// ============================================================
+// ROTA: GERAR QUESTÕES (COM FALLBACK)
 // ============================================================
 app.post('/api/gerar', async (req, res) => {
     try {
         const { topico, quantidade } = req.body;
-        const qtd = parseInt(quantidade) || 20;
+        const qtd = parseInt(quantidade) || 10;
         const API_KEY = process.env.DEEPSEEK_API_KEY;
 
-        // VERIFICAR SE A CHAVE EXISTE
+        console.log(`📝 Solicitado: ${qtd} questões sobre "${topico}"`);
+        console.log(`🔑 API Key configurada: ${API_KEY ? '✅ Sim' : '❌ Não'}`);
+
+        // SE NÃO TIVER CHAVE, USA O BANCO LOCAL
         if (!API_KEY) {
+            console.log('⚠️ Sem chave API. Usando banco local.');
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: 'Chave API do DeepSeek não configurada'
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local'
             });
         }
 
-        console.log(`📝 Gerando ${qtd} questões sobre "${topico}"...`);
+        // ===== TENTAR CHAMAR A API DEEPSEEK =====
+        console.log('🔄 Chamando DeepSeek API...');
 
-        const prompt = `Você é um professor de concurso público, especialista em questões estilo CEBRASPE (Certo/Errado).
+        const prompt = `Gere ${qtd} questões INÉDITAS no estilo CEBRASPE (Certo/Errado) sobre "${topico}".
+        
+        REGRAS:
+        1. Cada questão deve ser uma assertiva (frase curta de até 200 caracteres)
+        2. Deve ter uma "pegadinha" - uma palavra que torna a frase certa ou errada
+        3. Nível médio/difícil (igual à CEBRASPE)
+        
+        FORMATO DE RESPOSTA (JSON PURO):
+        [
+            {"c": "topico", "s": "assertiva", "a": true/false, "j": "justificativa curta"}
+        ]
+        
+        Responda APENAS com o JSON, sem texto adicional.`;
 
-Gere ${qtd} questões INÉDITAS sobre "${topico}".
-
-REQUISITOS:
-1. Cada questão deve ser uma assertiva (frase curta de até 200 caracteres)
-2. Deve ter uma "pegadinha" - uma palavra que torna a frase certa ou errada
-3. Nível médio/difícil (igual à CEBRASPE)
-
-FORMATO DE RESPOSTA (JSON PURO):
-[
-    {"c": "topico", "s": "assertiva", "a": true/false, "j": "justificativa curta"}
-]
-
-Responda APENAS com o JSON, sem texto adicional.`;
-
-        // ===== CHAMAR DEEPSEEK =====
         const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -52,7 +85,7 @@ Responda APENAS com o JSON, sem texto adicional.`;
             body: JSON.stringify({
                 model: 'deepseek-chat',
                 messages: [
-                    { role: 'system', content: 'Você é um especialista em concursos. Responda apenas com JSON válido.' },
+                    { role: 'system', content: 'Você é um especialista em concursos públicos. Responda apenas com JSON válido.' },
                     { role: 'user', content: prompt }
                 ],
                 temperature: 0.8,
@@ -63,29 +96,40 @@ Responda APENAS com o JSON, sem texto adicional.`;
         // VERIFICAR SE A RESPOSTA É OK
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Erro na API:', response.status, errorText);
+            console.error(`❌ Erro na API (${response.status}):`, errorText);
+            
+            // FALLBACK: usar banco local
+            console.log('⚠️ Usando banco local (fallback)');
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: `API DeepSeek retornou erro ${response.status}`
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local (fallback)',
+                erro: `API retornou ${response.status}`
             });
         }
 
         const data = await response.json();
         console.log('✅ Resposta da API recebida');
 
-        // EXTRAIR O CONTEÚDO
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-            console.error('❌ Formato inesperado:', JSON.stringify(data));
+        // ===== EXTRAIR O CONTEÚDO =====
+        let conteudo = '';
+        try {
+            conteudo = data.choices[0].message.content;
+            console.log('📄 Conteúdo recebido (primeiros 200 chars):', conteudo.substring(0, 200));
+        } catch (e) {
+            console.error('❌ Erro ao extrair conteúdo:', e);
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: 'Formato de resposta inesperado da API'
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local (erro parse)'
             });
         }
 
-        const conteudo = data.choices[0].message.content;
-        console.log('📄 Conteúdo:', conteudo.substring(0, 200) + '...');
-
-        // LIMPAR E PARSEAR O JSON
+        // ===== LIMPAR E PARSEAR O JSON =====
         let questoes = [];
         try {
             const jsonStr = conteudo
@@ -95,17 +139,25 @@ Responda APENAS com o JSON, sem texto adicional.`;
             questoes = JSON.parse(jsonStr);
         } catch (e) {
             console.error('❌ Erro ao parsear JSON:', e.message);
+            // FALLBACK: banco local
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: 'Erro ao processar a resposta da IA'
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local (erro json)'
             });
         }
 
-        // VALIDAR AS QUESTÕES
+        // ===== VALIDAR AS QUESTÕES =====
         if (!Array.isArray(questoes) || questoes.length === 0) {
+            console.log('⚠️ Nenhuma questão gerada. Usando banco local.');
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: 'Nenhuma questão válida gerada'
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local (vazio)'
             });
         }
 
@@ -120,9 +172,12 @@ Responda APENAS com o JSON, sem texto adicional.`;
             }));
 
         if (questoesValidas.length === 0) {
+            const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
-                success: false,
-                erro: 'As questões geradas não são válidas'
+                success: true,
+                questoes: locais,
+                total: locais.length,
+                origem: 'local (invalidas)'
             });
         }
 
@@ -136,12 +191,50 @@ Responda APENAS com o JSON, sem texto adicional.`;
 
     } catch (error) {
         console.error('❌ Erro no servidor:', error);
+        
+        // FALLBACK: banco local
+        const topico = req.body.topico || 'geral';
+        const qtd = parseInt(req.body.quantidade) || 10;
+        const locais = gerarQuestoesLocais(topico, qtd);
+        
         res.json({
-            success: false,
-            erro: error.message || 'Erro interno do servidor'
+            success: true,
+            questoes: locais,
+            total: locais.length,
+            origem: 'local (erro)',
+            erro: error.message
         });
     }
 });
+
+// ============================================================
+// FUNÇÃO: GERAR QUESTÕES LOCAIS
+// ============================================================
+function gerarQuestoesLocais(topico, quantidade) {
+    const qtd = Math.min(quantidade, 30);
+    
+    let filtradas = QUESTAO_LOCAL.filter(q => topico === 'todos' || q.c === topico);
+    
+    if (filtradas.length === 0) {
+        filtradas = QUESTAO_LOCAL.slice(0, 10);
+    }
+    
+    const resultado = [];
+    for (let i = 0; i < qtd; i++) {
+        const original = filtradas[i % filtradas.length];
+        resultado.push({
+            c: original.c,
+            s: original.s + (i >= filtradas.length ? ` (Variação ${Math.floor(i/filtradas.length)+1})` : ''),
+            a: original.a,
+            j: original.j,
+            id: i + 1,
+            answered: false,
+            correct: null
+        });
+    }
+    
+    return resultado;
+}
 
 // ============================================================
 // ROTA: STATUS
@@ -149,7 +242,8 @@ Responda APENAS com o JSON, sem texto adicional.`;
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'online',
-        deepseek: process.env.DEEPSEEK_API_KEY ? 'configurado' : 'não configurado'
+        deepseek: process.env.DEEPSEEK_API_KEY ? 'configurado' : 'não configurado',
+        local_questoes: QUESTAO_LOCAL.length
     });
 });
 
@@ -159,4 +253,5 @@ app.get('/api/status', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📡 Status: http://localhost:${PORT}/api/status`);
+    console.log(`🔑 DeepSeek: ${process.env.DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
 });
