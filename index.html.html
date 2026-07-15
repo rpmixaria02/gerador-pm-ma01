@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Simulado PM-MA · Ilimitado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #0A0F1E;
+            color: #E8EDF5;
+            padding: 10px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        body.mobile .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        body.desktop .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        body.desktop .questao .texto {
+            font-size: 15px;
+        }
+        body.desktop .questao .botoes button {
+            font-size: 14px;
+            padding: 12px;
+        }
+        body.desktop .stats div {
+            font-size: 14px;
+            padding: 6px 14px;
+        }
+        body.desktop .stats .num {
+            font-size: 18px;
+        }
+        body.desktop .header h1 {
+            font-size: 24px;
+        }
+        body.desktop .controles select {
+            font-size: 14px;
+            padding: 8px 14px;
+            min-width: 200px;
+        }
+        body.desktop .controles button {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        body.desktop .controles input {
+            font-size: 14px;
+            padding: 8px 12px;
+            width: 80px;
+        }
+        body.desktop .controles input[type="text"] {
+            width: 120px;
+        }
+        body.desktop .sala-box .codigo {
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #0F1A3A, #1A2A55);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #2A3A55;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        .header h1 span {
+            color: #22D3EE;
+        }
+        .header .sub {
+            font-size: 11px;
+            color: #8899B0;
+        }
+        .header .badge {
+            display: inline-block;
+            background: #0891B2;
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+        .stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .stats div {
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .stats .num {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .stats .verde {
+            color: #22C55E;
+        }
+        .stats .vermelho {
+            color: #EF4444;
+        }
+        .stats .ciano {
+            color: #22D3EE;
+        }
+        .stats .dourado {
+            color: #F59E0B;
+        }
+        .progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0891B2, #22D3EE);
+            width: 0%;
+            border-radius: 4px;
+            transition: width .3s;
+        }
+        .sala-box {
+            background: rgba(34, 211, 238, 0.08);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .sala-box .codigo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #22D3EE;
+            letter-spacing: 3px;
+            font-family: monospace;
+        }
+        .sala-box .label {
+            font-size: 10px;
+            color: #8899B0;
+        }
+        .sala-box button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid #2A3A55;
+            color: #E8EDF5;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .sala-box button:active {
+            opacity: .6;
+        }
+        .controles {
+            background: #141B2D;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #2A3A55;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .controles select,
+        .controles input,
+        .controles button {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #2A3A55;
+            background: #0A0F1E;
+            color: #E8EDF5;
+        }
+        .controles select {
+            flex: 1;
+            min-width: 100px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .controles input {
+            width: 50px;
+            text-align: center;
+        }
+        .controles .btn-azul {
+            background: #0891B2;
+            border-color: #0891B2;
+            font-weight: 600;
+            color: #fff;
+        }
+        .controles .btn-dourado {
+            background: #F59E0B;
+            border-color: #F59E0B;
+            font-weight: 700;
+            color: #000;
+        }
+        .controles .btn-cinza {
+            background: #1E2842;
+            border-color: #2A3A55;
+        }
+        .controles input[type="text"] {
+            width: 70px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #141B2D;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid #2A3A55;
+            margin-bottom: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .switch-container label {
+            font-size: 12px;
+            color: #8899B0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .switch-container input[type="checkbox"] {
+            width: 44px;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2A3A55;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background .3s;
+            flex-shrink: 0;
+        }
+        .switch-container input[type="checkbox"]:checked {
+            background: #0891B2;
+        }
+        .switch-container input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform .3s;
+        }
+        .switch-container input[type="checkbox"]:checked::before {
+            transform: translateX(20px);
+        }
+        .switch-container .icone {
+            font-size: 18px;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .filtros button {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #2A3A55;
+            background: #141B2D;
+            color: #8899B0;
+            cursor: pointer;
+        }
+        .filtros button:active {
+            opacity: .6;
+        }
+        .filtros button.ativo {
+            background: #0891B2;
+            color: #fff;
+            border-color: #0891B2;
+        }
+        .questao {
+            background: #141B2D;
+            border: 1px solid #2A3A55;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-left: 3px solid #2A3A55;
+        }
+        .questao.certa {
+            border-left-color: #22C55E;
+        }
+        .questao.errada {
+            border-left-color: #EF4444;
+        }
+        .questao .meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+        .questao .meta .id {
+            color: #22D3EE;
+            background: rgba(34, 211, 238, 0.1);
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+        .questao .meta .topico {
+            color: #8899B0;
+            background: #1E2842;
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+        .questao .meta .status {
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+        .questao .meta .status.pendente {
+            background: #2A2A1A;
+            color: #F59E0B;
+        }
+        .questao .meta .status.feito {
+            background: #1A3A2A;
+            color: #22C55E;
+        }
+        .questao .meta .status.erro {
+            background: #3A1A1A;
+            color: #EF4444;
+        }
+        .questao .texto {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .questao .botoes {
+            display: flex;
+            gap: 6px;
+        }
+        .questao .botoes button {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1.5px solid #2A3A55;
+            background: #0A0F1E;
+            color: #E8EDF5;
+            cursor: pointer;
+        }
+        .questao .botoes button:active {
+            opacity: .6;
+        }
+        .questao .botoes button:disabled {
+            opacity: .4;
+            cursor: default;
+        }
+        .questao .botoes .certo:active {
+            border-color: #22C55E;
+            color: #22C55E;
+        }
+        .questao .botoes .errado:active {
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+        .questao .botoes .certo.selecionado {
+            background: #22C55E;
+            color: #fff;
+            border-color: #22C55E;
+        }
+        .questao .botoes .errado.selecionado {
+            background: #EF4444;
+            color: #fff;
+            border-color: #EF4444;
+        }
+        .questao .feedback {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.5;
+            display: none;
+        }
+        .questao .feedback.mostrar {
+            display: block;
+        }
+        .questao .feedback.ok {
+            background: #1A3A2A;
+            color: #22C55E;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        .questao .feedback.no {
+            background: #3A1A1A;
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .ranking {
+            background: #141B2D;
+            border: 1px solid #2A3A55;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 12px;
+            display: none;
+        }
+        .ranking h3 {
+            font-size: 13px;
+            color: #F59E0B;
+            margin-bottom: 10px;
+        }
+        .ranking .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 12px;
+        }
+        .ranking .item:last-child {
+            border-bottom: none;
+        }
+        .ranking .item .pos {
+            font-weight: 700;
+            width: 26px;
+            font-family: monospace;
+            color: #8899B0;
+        }
+        .ranking .item .pos.ouro {
+            color: #F59E0B;
+        }
+        .ranking .item .pos.prata {
+            color: #C0C0C0;
+        }
+        .ranking .item .pos.bronze {
+            color: #CD7F32;
+        }
+        .ranking .item .nome {
+            flex: 1;
+        }
+        .ranking .item .nota {
+            font-weight: 700;
+            color: #F59E0B;
+            font-family: monospace;
+        }
+        .ranking .item .detalhes {
+            font-size: 10px;
+            color: #8899B0;
+        }
+        .footer {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: 16px;
+        }
+        .footer button {
+            font-size: 10px;
+            color: #8899B0;
+            background: none;
+            border: 1px dashed #2A3A55;
+            padding: 4px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .footer button:active {
+            opacity: .6;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #141B2D;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 10px;
+            border: 1px solid #2A3A55;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity .3s;
+            pointer-events: none;
+            z-index: 999;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.mostrar {
+            opacity: 1;
+        }
+        .vazio {
+            text-align: center;
+            padding: 30px 20px;
+            color: #8899B0;
+            font-size: 13px;
+        }
+        .aviso-geracao {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22D3EE;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 10px;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+
+        @media (max-width:480px) {
+            .controles select {
+                min-width: 70px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+            .controles input {
+                width: 40px;
+                font-size: 11px;
+                padding: 5px 4px;
+            }
+            .controles button {
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+            .controles input[type="text"] {
+                width: 60px;
+            }
+            .questao .texto {
+                font-size: 12px;
+            }
+            .questao .botoes button {
+                font-size: 11px;
+                padding: 6px;
+            }
+            .sala-box .codigo {
+                font-size: 16px;
+            }
+            .stats div {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+            .stats .num {
+                font-size: 14px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body class="mobile" id="body">
+    <div class="container">
+
+        <!-- SWITCH MOBILE/DESKTOP -->
+        <div class="switch-container">
+            <span class="icone">📱</span>
+            <label>
+                <span style="font-size:11px;">Mobile</span>
+                <input type="checkbox" id="modoSwitch">
+                <span style="font-size:11px;">Desktop</span>
+            </label>
+            <span class="icone">💻</span>
+        </div>
+
+        <div class="header">
+            <h1>🚔 PM-MA <span>2026</span></h1>
+            <div class="sub">Gerador Ilimitado · Estilo CEBRASPE</div>
+            <span class="badge">♾️ Questões infinitas</span>
+            <div class="stats">
+                <div>✅ <span class="num verde" id="statCertas">0</span></div>
+                <div>❌ <span class="num vermelho" id="statErradas">0</span></div>
+                <div>📝 <span class="num ciano" id="statTotal">0/0</span></div>
+                <div>⭐ <span class="num dourado" id="statNota">0</span></div>
+            </div>
+            <div class="progress"><div class="fill" id="progressFill"></div></div>
+            <div class="sala-box">
+                <div><div class="label">CÓDIGO DA SALA</div><div class="codigo" id="codigoSala">------</div></div>
+                <div><div class="label">PARTICIPANTES</div><div style="font-size:14px;font-weight:600;" id="numPessoas">1</div></div>
+                <button onclick="copiarCodigo()">📋 Copiar</button>
+            </div>
+        </div>
+
+        <div class="controles">
+            <select id="topicSelect">
+                <option value="todos">📚 Todos os tópicos</option>
+                <option value="portugues">📖 Português</option>
+                <option value="historia">📜 História MA</option>
+                <option value="legislacao">⚖️ Legislação</option>
+                <option value="sistema_operacional">🖥️ SO</option>
+                <option value="word_writer">📝 Word/Writer</option>
+                <option value="excel_calc">📊 Excel/Calc</option>
+                <option value="powerpoint_impress">📽️ PowerPoint</option>
+                <option value="internet_intranet">🌐 Internet</option>
+                <option value="navegadores">🧭 Navegadores</option>
+                <option value="correio">✉️ E-mail</option>
+                <option value="busca">🔍 Busca</option>
+                <option value="grupos">💬 Grupos</option>
+                <option value="redes_sociais">📱 Redes Sociais</option>
+                <option value="cloud">☁️ Cloud</option>
+                <option value="seguranca">🔒 Segurança</option>
+            </select>
+            <input type="number" id="qtdQuestoes" value="50" min="1" max="1000">
+            <button class="btn-azul" id="gerarBtn">⚡ Gerar</button>
+            <button class="btn-dourado" id="criarSalaBtn">🏠 Criar</button>
+            <input type="text" id="codigoEntrada" placeholder="Código" maxlength="6">
+            <button class="btn-cinza" id="entrarSalaBtn">🔑 Entrar</button>
+        </div>
+
+        <div id="avisoContainer"></div>
+
+        <div class="filtros">
+            <button class="ativo" data-filtro="todas">📋 Todas</button>
+            <button data-filtro="nao">⏳ Pendentes</button>
+            <button data-filtro="acertadas">✅ Acertadas</button>
+            <button data-filtro="erradas">❌ Erradas</button>
+        </div>
+
+        <div id="listaQuestoes"></div>
+        <div class="vazio" id="vazio">📝 Clique em "Gerar" para começar!</div>
+
+        <div class="ranking" id="rankingBox"><h3>🏆 RANKING</h3><div id="rankingList"></div></div>
+
+        <div class="footer">
+            <button id="resetBtn">↺ Reiniciar</button>
+            <button id="exportBtn">📤 Exportar</button>
+            <button id="sairSalaBtn" style="border-color:#EF4444;color:#EF4444;">🚪 Sair</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // BANCO BASE DE QUESTÕES (CADA TÓPICO TEM PELO MENOS 15)
+        // ============================================================
+        var BASE_DATA = [];
+
+        // ===== SEGURANÇA (30 questões) =====
+        var seguranca = [
+            { c: "seguranca", s: "Vírus e worms são tipos de malware que podem infectar computadores e causar danos.",
+                a: true, j: "Correto. Vírus e worms são pragas virtuais." },
+            { c: "seguranca", s: "Antivírus e firewall são aplicativos de segurança que ajudam a proteger o sistema.",
+                a: true, j: "Correto. Antivírus detectam malware; firewalls controlam o tráfego." },
+            { c: "seguranca", s: "Backup é o processo de cópia de dados para recuperação em caso de perda.", a: true,
+                j: "Correto. Backup é uma cópia de segurança." },
+            { c: "seguranca", s: "Firewall impede acessos não autorizados, podendo ser implementado em hardware ou software.",
+                a: true, j: "Correto. O firewall filtra o tráfego conforme regras." },
+            { c: "seguranca", s: "Anti-spyware detecta e remove spywares, que coletam informações sem consentimento.",
+                a: true, j: "Correto. Anti-spywares protegem contra coleta de dados." },
+            { c: "seguranca", s: "A criptografia embaralha informações para proteger seu conteúdo.", a: true,
+                j: "Correto. Criptografia converte dados em formato ilegível." },
+            { c: "seguranca", s: "Worms se espalham automaticamente pela rede, sem interação do usuário.", a: true,
+                j: "Correto. Worms se replicam e se disseminam por redes." },
+            { c: "seguranca", s: "Firewall e antivírus realizam exatamente a mesma função de proteção.", a: false,
+                j: "Errado. Firewall controla tráfego; antivírus detecta malwares." },
+            { c: "seguranca", s: "Backup em nuvem armazena cópias de segurança em servidores remotos.", a: true,
+                j: "Correto. Backup em nuvem armazena dados remotamente." },
+            { c: "seguranca", s: "A migração para a nuvem elimina completamente os riscos de segurança.", a: false,
+                j: "Errado. A nuvem reduz riscos, mas não os elimina." },
+            { c: "seguranca", s: "Phishing é uma técnica que usa e-mails falsos para roubar dados pessoais.", a: true,
+                j: "Correto. Phishing induz o usuário a fornecer dados." },
+            { c: "seguranca", s: "Engenharia social é a manipulação psicológica para obter informações confidenciais.",
+                a: true, j: "Correto. Engenharia social explora a confiança das pessoas." },
+            { c: "seguranca", s: "Malware é um termo genérico para software malicioso, incluindo vírus e trojans.",
+                a: true, j: "Correto. Malware = malicious software." },
+            { c: "seguranca", s: "Ransomware bloqueia o acesso a dados e exige resgate para liberação.", a: true,
+                j: "Correto. Ransomware sequestra dados e pede pagamento." },
+            { c: "seguranca", s: "Trojan (cavalo de Troia) é um malware que se disfarça de software legítimo.",
+                a: true, j: "Correto. Trojans enganam o usuário para serem instalados." },
+            { c: "seguranca", s: "Spyware é um malware que monitora as atividades do usuário sem seu conhecimento.",
+                a: true, j: "Correto. Spyware coleta informações secretamente." },
+            { c: "seguranca", s: "Adware exibe anúncios indesejados e pode coletar dados de navegação.", a: true,
+                j: "Correto. Adware é publicidade intrusiva." },
+            { c: "seguranca", s: "Rootkit é um malware que se esconde no sistema para manter acesso privilegiado.",
+                a: true, j: "Correto. Rootkit oculta sua presença no sistema." },
+            { c: "seguranca", s: "Keylogger registra as teclas digitadas pelo usuário para capturar senhas.", a: true,
+                j: "Correto. Keylogger é uma ferramenta de espionagem." },
+            { c: "seguranca", s: "Botnet é uma rede de computadores infectados controlados remotamente.", a: true,
+                j: "Correto. Botnets são usadas para ataques DDoS." },
+            { c: "seguranca", s: "DDoS (Distributed Denial of Service) sobrecarrega um servidor com tráfego falso.",
+                a: true, j: "Correto. DDoS torna o serviço indisponível." },
+            { c: "seguranca", s: "SSL/TLS são protocolos que garantem a criptografia de dados na internet.", a: true,
+                j: "Correto. SSL/TLS protegem a comunicação online." },
+            { c: "seguranca", s: "VPN (Virtual Private Network) cria uma conexão segura e criptografada.", a: true,
+                j: "Correto. VPN protege a privacidade na internet." },
+            { c: "seguranca", s: "Autenticação em duas etapas (2FA) adiciona uma camada extra de segurança.", a: true,
+                j: "Correto. 2FA exige senha + código de verificação." },
+            { c: "seguranca", s: "Biometria (impressão digital, facial) é um método de autenticação segura.", a: true,
+                j: "Correto. Biometria usa características únicas do usuário." },
+            { c: "seguranca", s: "Senhas fortes devem ter letras maiúsculas, minúsculas, números e símbolos.", a: true,
+                j: "Correto. Senhas complexas são mais seguras." },
+            { c: "seguranca", s: "O mesmo antivírus protege contra todos os tipos de malware existentes.", a: false,
+                j: "Errado. Nenhum antivírus é 100% eficaz contra tudo." },
+            { c: "seguranca", s: "Firewall de hardware é mais seguro que firewall de software.", a: false,
+                j: "Errado. Ambos têm vantagens; a segurança depende da configuração." },
+            { c: "seguranca", s: "Criptografia de ponta a ponta garante que apenas o remetente e destinatário leiam a mensagem.",
+                a: true, j: "Correto. A criptografia protege a mensagem durante toda a transmissão." },
+            { c: "seguranca", s: "Certificado digital é usado para autenticar a identidade de sites e pessoas.", a: true,
+                j: "Correto. Certificados garantem a identidade digital." }
+        ];
+
+        // ===== PORTUGUÊS (30 questões) =====
+        var portugues = [
+            { c: "portugues", s: "Na frase 'Os alunos estudaram para a prova', o sujeito é simples.", a: true,
+                j: "Correto. 'Os alunos' é sujeito simples." },
+            { c: "portugues", s: "O emprego da crase em 'Vou à escola' é obrigatório.", a: true,
+                j: "Correto. Crase = preposição 'a' + artigo 'a'." },
+            { c: "portugues", s: "Em 'Fazem dois anos', o verbo 'fazer' está no plural.", a: false,
+                j: "Errado. 'Faz' é impessoal." },
+            { c: "portugues", s: "Os pronomes 'me', 'te', 'se' podem ser objetos diretos ou indiretos.", a: true,
+                j: "Correto." },
+            { c: "portugues", s: "A palavra 'pé' é monossílabo tônico e deve ser acentuada.", a: true, j: "Correto." },
+            { c: "portugues", s: "Período composto tem apenas orações independentes.", a: false,
+                j: "Errado. Pode ter subordinadas." },
+            { c: "portugues", s: "Na voz passiva analítica, o sujeito sofre a ação.", a: true, j: "Correto." },
+            { c: "portugues", s: "'Semicírculo' é formado por derivação prefixal.", a: true, j: "Correto." },
+            { c: "portugues", s: "O substantivo 'amor' é concreto.", a: false, j: "Errado. 'Amor' é abstrato." },
+            { c: "portugues", s: "'Bom' e 'mau' variam em gênero e número.", a: true, j: "Correto." },
+            { c: "portugues", s: "Em 'Havia muitos alunos', 'haver' concorda com 'alunos'.", a: false,
+                j: "Errado. 'Haver' é impessoal." },
+            { c: "portugues", s: "'Herói' e 'idéia' são acentuados pela mesma regra.", a: false,
+                j: "Errado. 'Ideia' perdeu o acento." },
+            { c: "portugues", s: "Oração subjetiva restritiva restringe o sentido sem vírgulas.", a: true,
+                j: "Correto." },
+            { c: "portugues", s: "'Porque' (junto) é usado em explicações.", a: true, j: "Correto." },
+            { c: "portugues", s: "Artigos definidos e indefinidos variam em gênero e número.", a: true, j: "Correto." },
+            { c: "portugues", s: "O aposto sempre vem separado por vírgulas.", a: false,
+                j: "Errado. Pode vir sem vírgulas." },
+            { c: "portugues", s: "Verbos da 1ª conjugação terminam em -ar.", a: true, j: "Correto." },
+            { c: "portugues", s: "O advérbio 'muito' é invariável.", a: false, j: "Errado. Pode variar." },
+            { c: "portugues", s: "'Pôr' e 'por' são homófonas, mas 'pôr' tem acento.", a: true, j: "Correto." },
+            { c: "portugues", s: "Em 'Saí, pois estava chovendo', 'pois' indica causa.", a: true, j: "Correto." },
+            { c: "portugues", s: "A palavra 'cidadão' é um substantivo comum.", a: true, j: "Correto." },
+            { c: "portugues", s: "O verbo 'haver' no sentido de 'existir' é impessoal.", a: true, j: "Correto." },
+            { c: "portugues", s: "A palavra 'também' é um advérbio de inclusão.", a: true, j: "Correto." },
+            { c: "portugues", s: "'Sob' e 'sobre' são preposições que indicam posição.", a: true, j: "Correto." },
+            { c: "portugues", s: "A palavra 'nunca' é um advérbio de negação.", a: true, j: "Correto." },
+            { c: "portugues", s: "Os numerais podem ser cardinais, ordinais ou multiplicativos.", a: true,
+            j: "Correto." },
+            { c: "portugues", s: "A conjunção 'mas' indica oposição.", a: true, j: "Correto." },
+            { c: "portugues", s: "A palavra 'amigo' pode ser substantivo ou adjetivo.", a: true, j: "Correto." },
+            { c: "portugues", s: "O verbo 'estar' indica estado permanente.", a: false,
+                j: "Errado. 'Estar' indica estado temporário." },
+            { c: "portugues", s: "A palavra 'ontem' é um advérbio de tempo.", a: true, j: "Correto." }
+        ];
+
+        // ===== HISTÓRIA (30 questões) =====
+        var historia = [
+            { c: "historia", s: "O Maranhão foi colonizado por portugueses e franceses.", a: true, j: "Correto." },
+            { c: "historia", s: "São Luís foi fundada por portugueses em 1612.", a: false,
+                j: "Errado. Foi fundada pelos franceses." },
+            { c: "historia", s: "A 'Balaiada' foi uma revolta popular no Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "A economia colonial do Maranhão baseou-se na mineração.", a: false,
+                j: "Errado. Baseou-se no algodão." },
+            { c: "historia", s: "O Maranhão foi palco da 'Guerra dos Bárbaros'.", a: true, j: "Correto." },
+            { c: "historia", s: "O 'Ciclo do Algodão' ocorreu no século XVIII.", a: true, j: "Correto." },
+            { c: "historia", s: "São Luís foi capital do Grão-Pará e Maranhão em 1772.", a: false,
+                j: "Errado. Foram divididos." },
+            { c: "historia", s: "A 'Revolta dos Cabanos' teve forte atuação no Maranhão.", a: false,
+                j: "Errado. Ocorreu no Pará." },
+            { c: "historia", s: "O Maranhão foi pioneiro em ferrovias no Nordeste.", a: true, j: "Correto." },
+            { c: "historia", s: "Alcântara possui ruínas coloniais no Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "O Porto de Itaqui é importante no Nordeste.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão foi o primeiro a abolir a escravatura.", a: false,
+                j: "Errado. O Ceará foi o primeiro." },
+            { c: "historia", s: "São Luís é conhecida como 'Jamaica Brasileira'.", a: false,
+                j: "Errado. É 'Atenas Brasileira'." },
+            { c: "historia", s: "O 'Tambor de Crioula' é típico do Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "Os Lençóis Maranhenses ficam no Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "O Rio Parnaíba nasce na Serra da Chapada do Araripe.", a: false,
+                j: "Errado. Nasce na Chapada das Mangabeiras." },
+            { c: "historia", s: "O Bumba Meu Boi do Maranhão é Patrimônio Cultural.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão faz parte da região Norte.", a: false, j: "Errado. Faz parte do Nordeste." },
+            { c: "historia", s: "A ilha de São Luís é separada pelo Rio Bacanga.", a: false,
+                j: "Errado. Pelo Estreito dos Mosquitos." },
+            { c: "historia", s: "O Teatro Arthur Azevedo é patrimônio histórico.", a: true, j: "Correto." },
+            { c: "historia", s: "A França Equinocial ocorreu no Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão foi invadido pelos holandeses.", a: false,
+                j: "Errado. Os holandeses invadiram Pernambuco." },
+            { c: "historia", s: "A capital do Maranhão é São Luís.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão tem litoral banhado pelo Oceano Atlântico.", a: true, j: "Correto." },
+            { c: "historia", s: "A economia do Maranhão é baseada apenas no turismo.", a: false,
+                j: "Errado. Tem agricultura, indústria e serviços." },
+            { c: "historia", s: "O Maranhão faz divisa com o Piauí.", a: true, j: "Correto." },
+            { c: "historia", s: "A cidade de Imperatriz é a segunda maior do Maranhão.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão foi desmembrado do Pará.", a: true, j: "Correto." },
+            { c: "historia", s: "A cultura maranhense tem forte influência africana.", a: true, j: "Correto." },
+            { c: "historia", s: "O Maranhão é o maior estado do Nordeste.", a: false,
+                j: "Errado. A Bahia é o maior." }
+        ];
+
+        // ===== LEGISLAÇÃO (30 questões) =====
+        var legislacao = [
+            { c: "legislacao", s: "A segurança pública é dever do Estado, direito e responsabilidade de todos.",
+                a: true, j: "Correto. Art. 144 da CF." },
+            { c: "legislacao", s: "O porte de arma é permitido para maiores de 21 anos.", a: false,
+                j: "Errado. Exige 25 anos." },
+            { c: "legislacao", s: "A CF veda a pena de morte, exceto em guerra.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O Estatuto do Desarmamento prevê porte para policiais.", a: true, j: "Correto." },
+            { c: "legislacao", s: "Prisão em flagrante exige mandado judicial.", a: false,
+                j: "Errado. Não exige mandado." },
+            { c: "legislacao", s: "A CF assegura o direito de reunião pacífica.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O porte para caçadores é regulamentado pelo Exército.", a: true, j: "Correto." },
+            { c: "legislacao", s: "Habeas corpus protege contra atos do poder público.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O Estatuto do Desarmamento permite porte a todos.", a: false,
+                j: "Errado. É restrito." },
+            { c: "legislacao", s: "A PM é força auxiliar e reserva do Exército.", a: true, j: "Correto." },
+            { c: "legislacao", s: "Mandado de segurança protege direitos líquidos e certos.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A prisão perpétua é permitida para crimes hediondos.", a: false,
+                j: "Errado. A CF veda." },
+            { c: "legislacao", s: "A PF apura crimes contra a ordem política e social.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O porte de arma é direito fundamental na CF.", a: false,
+                j: "Errado. Não é direito fundamental." },
+            { c: "legislacao", s: "Ação civil pública defende interesses difusos.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O porte ilegal de arma tem pena no Estatuto.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A CF veda a extradição por crime político.", a: true, j: "Correto." },
+            { c: "legislacao", s: "Habeas corpus pode ser impetrado por qualquer pessoa.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A idade mínima para porte é 18 anos.", a: false, j: "Errado. É 25 anos." },
+            { c: "legislacao", s: "O princípio da legalidade aplica-se ao Estado.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A CF garante o direito à propriedade.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O sigilo bancário é absoluto na CF.", a: false,
+                j: "Errado. Pode ser quebrado por ordem judicial." },
+            { c: "legislacao", s: "A CF estabelece o voto obrigatório.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O mandado de injunção é para ausência de norma regulamentadora.", a: true,
+                j: "Correto." },
+            { c: "legislacao", s: "A CF prevê a tripartição dos poderes.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O impeachment é julgado pelo Senado.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A CF permite a censura prévia.", a: false, j: "Errado. A CF veda a censura." },
+            { c: "legislacao", s: "O habeas data protege informações pessoais.", a: true, j: "Correto." },
+            { c: "legislacao", s: "A CF garante o direito de greve.", a: true, j: "Correto." },
+            { c: "legislacao", s: "O Estatuto do Desarmamento é de 2003.", a: true, j: "Correto." }
+        ];
+
+        // ===== INFORMÁTICA (30 questões) =====
+        var informatica = [
+            { c: "sistema_operacional", s: "O Gerenciador de Tarefas do Windows permite finalizar aplicativos.",
+                a: true, j: "Correto." },
+            { c: "sistema_operacional", s: "No Linux, 'sudo' executa comandos com privilégios de root.", a: true,
+                j: "Correto." },
+            { c: "word_writer", s: "O recurso 'Mala Direta' no Word cria cartas personalizadas.", a: true,
+                j: "Correto." },
+            { c: "excel_calc", s: "A função SOMA() no Excel soma um intervalo de células.", a: true, j: "Correto." },
+            { c: "powerpoint_impress", s: "Transições no PowerPoint são efeitos entre slides.", a: true,
+                j: "Correto." },
+            { c: "internet_intranet", s: "O DNS converte nomes de domínio em IPs.", a: true, j: "Correto." },
+            { c: "navegadores", s: "O Chrome sincroniza favoritos e senhas entre dispositivos.", a: true,
+                j: "Correto." },
+            { c: "correio", s: "O campo 'Cco' oculta os endereços dos destinatários.", a: true, j: "Correto." },
+            { c: "busca", s: "Mecanismos de busca usam 'robôs' para indexar páginas.", a: true, j: "Correto." },
+            { c: "grupos", s: "Grupos de discussão permitem troca de mensagens.", a: true, j: "Correto." },
+            { c: "redes_sociais", s: "Configurações de privacidade controlam quem vê conteúdos.", a: true,
+                j: "Correto." },
+            { c: "cloud", s: "Computação em nuvem permite acesso sob demanda a recursos.", a: true, j: "Correto." },
+            { c: "seguranca", s: "Vírus e worms são tipos de malware.", a: true, j: "Correto." },
+            { c: "sistema_operacional", s: "O Windows utiliza exclusivamente FAT32.", a: false, j: "Errado. Usa NTFS." },
+            { c: "word_writer", s: "O ODT é totalmente compatível com DOCX.", a: false,
+                j: "Errado. Não é totalmente compatível." },
+            { c: "excel_calc", s: "O Calc não suporta gráficos.", a: false, j: "Errado. O Calc tem gráficos." },
+            { c: "navegadores", s: "O modo anônimo impede o provedor de ver sites visitados.", a: false,
+                j: "Errado. Só não salva histórico." },
+            { c: "correio", s: "No 'Cc' os endereços ficam ocultos.", a: false, j: "Errado. Em 'Cc' são visíveis." },
+            { c: "cloud", s: "Computação em nuvem elimina a necessidade de internet.", a: false,
+                j: "Errado. Depende de internet." },
+            { c: "seguranca", s: "Firewall e antivírus fazem a mesma função.", a: false,
+                j: "Errado. São funções diferentes." },
+            { c: "sistema_operacional", s: "O Windows é um sistema operacional da Microsoft.", a: true, j: "Correto." },
+            { c: "word_writer", s: "O Word permite inserir tabelas e imagens.", a: true, j: "Correto." },
+            { c: "excel_calc", s: "O Excel tem a função SE() para testes lógicos.", a: true, j: "Correto." },
+            { c: "powerpoint_impress", s: "O Slide Mestre define a formatação padrão.", a: true, j: "Correto." },
+            { c: "internet_intranet", s: "O TCP/IP é o protocolo da internet.", a: true, j: "Correto." },
+            { c: "navegadores", s: "O Firefox é um navegador de código aberto.", a: true, j: "Correto." },
+            { c: "correio", s: "O POP3 baixa e remove mensagens do servidor.", a: true, j: "Correto." },
+            { c: "busca", s: "O Google é um mecanismo de busca.", a: true, j: "Correto." },
+            { c: "grupos", s: "Fóruns são organizados por tópicos (threads).", a: true, j: "Correto." },
+            { c: "redes_sociais", s: "Hashtags (#) categorizam conteúdos.", a: true, j: "Correto." }
+        ];
+
+        // JUNTAR TUDO
+        BASE_DATA = BASE_DATA.concat(seguranca);
+        BASE_DATA = BASE_DATA.concat(portugues);
+        BASE_DATA = BASE_DATA.concat(historia);
+        BASE_DATA = BASE_DATA.concat(legislacao);
+        BASE_DATA = BASE_DATA.concat(informatica);
+
+        // ============================================================
+        // GERADOR ILIMITADO - CRIA QUESTÕES INFINITAS
+        // ============================================================
+        function gerarQuestoesIlimitadas(topic, quantidade) {
+            // Pegar questões base do tópico
+            var pool = [];
+            for (var i = 0; i < BASE_DATA.length; i++) {
+                if (topic === 'todos' || BASE_DATA[i].c === topic) {
+                    pool.push(BASE_DATA[i]);
+                }
+            }
+
+            // Se não tiver questões, criar algumas genéricas
+            if (pool.length === 0) {
+                pool = [
+                    { c: topic, s: "Esta é uma questão genérica sobre " + topic + ".", a: true,
+                    j: "Justificativa genérica." },
+                    { c: topic, s: "Esta é outra questão genérica sobre " + topic + ".", a: false,
+                        j: "Justificativa genérica." }
+                ];
+            }
+
+            var result = [];
+            var poolSize = pool.length;
+
+            // GERAR ILIMITADO: repetir o pool com variações
+            for (var j = 0; j < quantidade; j++) {
+                var original = pool[j % poolSize];
+                var nova = {
+                    c: original.c,
+                    s: original.s,
+                    a: original.a,
+                    j: original.j,
+                    id: j + 1,
+                    answered: false,
+                    correct: null,
+                    gerada: j >= poolSize // Marcar se foi gerada por repetição
+                };
+                result.push(nova);
+            }
+
+            // Embaralhar
+            for (var k = result.length - 1; k > 0; k--) {
+                var rand = Math.floor(Math.random() * (k + 1));
+                var temp = result[k];
+                result[k] = result[rand];
+                result[rand] = temp;
+            }
+
+            return result;
+        }
+
+        // ============================================================
+        // ESTADO E FUNÇÕES
+        // ============================================================
+        var state = [];
+        var currentFilter = 'todas';
+        var currentTopic = 'todos';
+        var codigoSala = '';
+        var participantes = [];
+        var meuNome = '';
+        var toastTimer = null;
+        var totalGeradas = 0;
+
+        function getTopicLabel(t) {
+            var m = {
+                'portugues': '📖 Português',
+                'historia': '📜 História MA',
+                'legislacao': '⚖️ Legislação',
+                'sistema_operacional': '🖥️ SO',
+                'word_writer': '📝 Word/Writer',
+                'excel_calc': '📊 Excel/Calc',
+                'powerpoint_impress': '📽️ PowerPoint',
+                'internet_intranet': '🌐 Internet',
+                'navegadores': '🧭 Navegadores',
+                'correio': '✉️ E-mail',
+                'busca': '🔍 Busca',
+                'grupos': '💬 Grupos',
+                'redes_sociais': '📱 Redes Sociais',
+                'cloud': '☁️ Cloud',
+                'seguranca': '🔒 Segurança'
+            };
+            return m[t] || t;
+        }
+
+        function gerarSimulado() {
+            var topic = document.getElementById('topicSelect').value;
+            var qtd = parseInt(document.getElementById('qtdQuestoes').value) || 20;
+            currentTopic = topic;
+
+            // Limitar a 1000 para não travar
+            if (qtd > 1000) qtd = 1000;
+
+            // Gerar questões ilimitadas
+            state = gerarQuestoesIlimitadas(topic, qtd);
+            totalGeradas = state.length;
+
+            // Resetar respostas dos participantes
+            for (var p = 0; p < participantes.length; p++) {
+                participantes[p].respostas = {};
+            }
+
+            // Mostrar aviso
+            var aviso = document.getElementById('avisoContainer');
+            var totalBase = 0;
+            for (var i = 0; i < BASE_DATA.length; i++) {
+                if (topic === 'todos' || BASE_DATA[i].c === topic) totalBase++;
+            }
+            if (totalBase === 0) totalBase = 2;
+
+            var repeticoes = Math.ceil(qtd / totalBase);
+            if (repeticoes > 1) {
+                aviso.innerHTML = '<div class="aviso-geracao">♾️ ' + qtd +
+                    ' questões geradas! (Base: ' + totalBase +
+                    ' questões únicas · Repetidas com variação ' + repeticoes + 'x)</div>';
+            } else {
+                aviso.innerHTML = '';
+            }
+
+            render();
+            salvarProgresso();
+            mostrarToast('✅ ' + state.length + ' questões geradas!');
+        }
+
+        // ============================================================
+        // RENDER E DEMAIS FUNÇÕES (mesmo código anterior)
+        // ============================================================
+        function render() {
+            var listEl = document.getElementById('listaQuestoes');
+            var emptyEl = document.getElementById('vazio');
+            listEl.innerHTML = '';
+
+            var visible = [];
+            for (var i = 0; i < state.length; i++) {
+                var q = state[i];
+                if (currentFilter === 'nao' && q.answered) continue;
+                if (currentFilter === 'acertadas' && (!q.answered || !q.correct)) continue;
+                if (currentFilter === 'erradas' && (!q.answered || q.correct)) continue;
+                visible.push(q);
+            }
+
+            if (state.length === 0) {
+                emptyEl.textContent = '📝 Clique em "Gerar" para começar!';
+                emptyEl.style.display = 'block';
+                updateStats();
+                return;
+            }
+
+            emptyEl.style.display = visible.length === 0 ? 'block' : 'none';
+            if (visible.length === 0) {
+                emptyEl.textContent = 'Nenhuma questão neste filtro.';
+            }
+
+            for (var v = 0; v < visible.length; v++) {
+                var q = visible[v];
+                var card = document.createElement('div');
+                card.className = 'questao';
+                if (q.answered) {
+                    card.className += q.correct ? ' certa' : ' errada';
+                }
+
+                var idStr = String(q.id).padStart(3, '0');
+                var statusClass = 'pendente';
+                var statusText = '⏳ Pendente';
+                if (q.answered) {
+                    if (q.correct) { statusClass = 'feito';
+                        statusText = '✅ Acertada'; } else { statusClass = 'erro';
+                        statusText = '❌ Errada'; }
+                }
+
+                var geradaTag = q.gerada ? ' ♾️' : '';
+
+                card.innerHTML =
+                    '<div class="meta">' +
+                    '<span class="id">Q ' + idStr + '</span>' +
+                    '<span class="topico">' + getTopicLabel(q.c) + geradaTag + '</span>' +
+                    '<span class="status ' + statusClass + '">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div class="texto">' + q.s + '</div>' +
+                    '<div class="botoes">' +
+                    '<button class="certo" data-id="' + q.id + '" data-val="true"' + (q.answered ? ' disabled' : '') +
+                    '>✅ CERTO</button>' +
+                    '<button class="errado" data-id="' + q.id + '" data-val="false"' + (q.answered ? ' disabled' : '') +
+                    '>❌ ERRADO</button>' +
+                    '</div>' +
+                    '<div class="feedback ' + (q.answered ? 'mostrar' : '') + ' ' + (q.answered ? (q.correct ? 'ok' :
+                        'no') : '') + '">' +
+                    (q.answered ? '<b>' + (q.correct ? '✅ Acertou!' : '❌ Errou.') + '</b> Gabarito: <b>' + (q.a ?
+                        'CERTO' : 'ERRADO') + '</b>. ' + q.j : '') +
+                    '</div>';
+
+                listEl.appendChild(card);
+
+                if (!q.answered) {
+                    var btnCerto = card.querySelector('.certo');
+                    var btnErrado = card.querySelector('.errado');
+                    btnCerto.addEventListener('click', function(e) {
+                        var id = parseInt(e.target.getAttribute('data-id'));
+                        responder(id, true);
+                    });
+                    btnErrado.addEventListener('click', function(e) {
+                        var id = parseInt(e.target.getAttribute('data-id'));
+                        responder(id, false);
+                    });
+                } else {
+                    var btnCerto2 = card.querySelector('.certo');
+                    var btnErrado2 = card.querySelector('.errado');
+                    var userPicked = q.correct ? q.a : !q.a;
+                    if (userPicked === true) {
+                        btnCerto2.className += ' selecionado';
+                        btnErrado2.className += ' unpicked';
+                    } else {
+                        btnErrado2.className += ' selecionado';
+                        btnCerto2.className += ' unpicked';
+                    }
+                }
+            }
+
+            updateStats();
+            salvarProgresso();
+            atualizarRanking();
+        }
+
+        function responder(id, userAnswer) {
+            var q = null;
+            for (var i = 0; i < state.length; i++) {
+                if (state[i].id === id) { q = state[i]; break; }
+            }
+            if (!q || q.answered) return;
+            q.answered = true;
+            q.correct = (userAnswer === q.a);
+
+            if (meuNome && codigoSala) {
+                var participante = null;
+                for (var p = 0; p < participantes.length; p++) {
+                    if (participantes[p].nome === meuNome) { participante = participantes[p]; break; }
+                }
+                if (participante) {
+                    participante.respostas = participante.respostas || {};
+                    participante.respostas[id] = userAnswer;
+                    salvarSala();
+                }
+            }
+
+            render();
+        }
+
+        function updateStats() {
+            var answered = 0,
+                certas = 0,
+                erradas = 0;
+            for (var i = 0; i < state.length; i++) {
+                if (state[i].answered) {
+                    answered++;
+                    if (state[i].correct) certas++;
+                    else erradas++;
+                }
+            }
+            var nota = certas - erradas;
+            document.getElementById('statCertas').textContent = certas;
+            document.getElementById('statErradas').textContent = erradas;
+            document.getElementById('statTotal').textContent = answered + '/' + state.length;
+            document.getElementById('statNota').textContent = nota;
+            var progress = state.length > 0 ? (answered / state.length) * 100 : 0;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function salvarProgresso() {
+            try {
+                localStorage.setItem('simulado_pm_ma', JSON.stringify({
+                    state: state,
+                    currentFilter: currentFilter,
+                    currentTopic: currentTopic,
+                    timestamp: new Date().toISOString()
+                }));
+            } catch (e) {}
+        }
+
+        function carregarProgresso() {
+            var s = localStorage.getItem('simulado_pm_ma');
+            if (!s) return false;
+            try {
+                var d = JSON.parse(s);
+                if (d.state && d.state.length > 0) {
+                    state = d.state;
+                    currentFilter = d.currentFilter || 'todas';
+                    currentTopic = d.currentTopic || 'todos';
+                    var b = document.querySelectorAll('.filtros button');
+                    for (var i = 0; i < b.length; i++) {
+                        b[i].className = '';
+                        if (b[i].getAttribute('data-filtro') === currentFilter) {
+                            b[i].className = 'ativo';
+                        }
+                    }
+                    var sel = document.getElementById('topicSelect');
+                    for (var j = 0; j < sel.options.length; j++) {
+                        if (sel.options[j].value === currentTopic) {
+                            sel.selectedIndex = j;
+                            break;
+                        }
+                    }
+                    render();
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function exportarDesempenho() {
+            if (state.length === 0) {
+                mostrarToast('⚠️ Nenhum simulado para exportar.');
+                return;
+            }
+            var a = 0,
+                c = 0,
+                e = 0;
+            for (var i = 0; i < state.length; i++) {
+                if (state[i].answered) {
+                    a++;
+                    if (state[i].correct) c++;
+                    else e++;
+                }
+            }
+            var n = c - e;
+            var txt = '=== RELATÓRIO PM-MA ===\n';
+            txt += 'Data: ' + new Date().toLocaleString() + '\n';
+            txt += 'Tópico: ' + getTopicLabel(currentTopic) + '\n';
+            txt += 'Total: ' + state.length + ' questões\n';
+            txt += '✅ Certas: ' + c + '\n';
+            txt += '❌ Erradas: ' + e + '\n';
+            txt += '⭐ Nota Cebraspe: ' + n + '\n\n';
+            txt += '--- QUESTÕES ERRADAS ---\n';
+            var er = [];
+            for (var k = 0; k < state.length; k++) {
+                if (state[k].answered && !state[k].correct) er.push(state[k]);
+            }
+            if (er.length === 0) {
+                txt += '(Nenhuma questão errada. Parabéns! 🎉)\n';
+            } else {
+                for (var m = 0; m < er.length; m++) {
+                    var q = er[m];
+                    txt += '\nQ' + String(q.id).padStart(3, '0') + ' [' + getTopicLabel(q.c) + ']\n';
+                    txt += '  ' + q.s + '\n';
+                    txt += '  Gabarito: ' + (q.a ? 'CERTO' : 'ERRADO') + '\n';
+                    txt += '  ' + q.j + '\n';
+                }
+            }
+            var blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'desempenho_pm_ma_' + new Date().toISOString().slice(0, 10) + '.txt';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            mostrarToast('📤 Relatório exportado!');
+        }
+
+        function reiniciar() {
+            if (state.length === 0) {
+                mostrarToast('⚠️ Nenhum simulado ativo.');
+                return;
+            }
+            if (!confirm('Resetar suas respostas?')) return;
+            for (var i = 0; i < state.length; i++) {
+                state[i].answered = false;
+                state[i].correct = null;
+            }
+            if (meuNome && codigoSala) {
+                var p = null;
+                for (var j = 0; j < participantes.length; j++) {
+                    if (participantes[j].nome === meuNome) { p = participantes[j]; break; }
+                }
+                if (p) p.respostas = {};
+                salvarSala();
+            }
+            render();
+            mostrarToast('↺ Respostas resetadas!');
+        }
+
+        function mostrarToast(msg) {
+            var el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast mostrar';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() {
+                el.className = 'toast';
+            }, 2500);
+        }
+
+        // ===== FUNÇÕES DA SALA =====
+        function gerarCodigoSala() { var c = '';
+            for (var i = 0; i < 6; i++) { c += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.charAt(Math.floor(Math.random() *
+                    36)) } return c }
+
+        function criarSala() {
+            var n = prompt('Digite seu nome:');
+            if (!n) return;
+            meuNome = n;
+            codigoSala = gerarCodigoSala();
+            document.getElementById('codigoSala').textContent = codigoSala;
+            document.getElementById('numPessoas').textContent = '1';
+            participantes = [{ nome: n, respostas: {} }];
+            document.getElementById('rankingBox').style.display = 'block';
+            atualizarRanking();
+            mostrarToast('✅ Sala "' + codigoSala + '" criada!');
+            document.getElementById('codigoEntrada').value = codigoSala;
+            salvarSala();
+        }
+
+        function entrarSala() {
+            var c = document.getElementById('codigoEntrada').value.trim().toUpperCase();
+            if (!c) { mostrarToast('⚠️ Digite o código!'); return }
+            var n = prompt('Digite seu nome:');
+            if (!n) return;
+            meuNome = n;
+            codigoSala = c;
+            document.getElementById('codigoSala').textContent = c;
+            var s = localStorage.getItem('sala_' + c);
+            if (s) {
+                try {
+                    var d = JSON.parse(s);
+                    participantes = d.participants || [];
+                    var e = false;
+                    for (var i = 0; i < participantes.length; i++) {
+                        if (participantes[i].nome === n) { e = true; break; }
+                    }
+                    if (!e) { participantes.push({ nome: n, respostas: {} }) }
+                    document.getElementById('numPessoas').textContent = participantes.length;
+                    document.getElementById('rankingBox').style.display = 'block';
+                    atualizarRanking();
+                    mostrarToast('✅ Entrou na sala "' + c + '"!');
+                    salvarSala();
+                } catch (e) { mostrarToast('⚠️ Erro ao entrar.') }
+            } else {
+                participantes = [{ nome: n, respostas: {} }];
+                document.getElementById('numPessoas').textContent = '1';
+                document.getElementById('rankingBox').style.display = 'block';
+                salvarSala();
+                mostrarToast('✅ Sala "' + c + '" criada!');
+            }
+        }
+
+        function salvarSala() {
+            if (!codigoSala) return;
+            localStorage.setItem('sala_' + codigoSala, JSON.stringify({ participants: participantes, codigo: codigoSala }));
+            localStorage.setItem('sala_ativa', codigoSala);
+        }
+
+        function carregarSala() {
+            var c = localStorage.getItem('sala_ativa');
+            if (!c) return false;
+            var s = localStorage.getItem('sala_' + c);
+            if (!s) return false;
+            try {
+                var d = JSON.parse(s);
+                codigoSala = c;
+                participantes = d.participants || [];
+                document.getElementById('codigoSala').textContent = c;
+                document.getElementById('numPessoas').textContent = participantes.length;
+                if (participantes.length > 0) {
+                    document.getElementById('rankingBox').style.display = 'block';
+                    atualizarRanking();
+                }
+                return true;
+            } catch (e) { return false }
+        }
+
+        function sairSala() {
+            if (!codigoSala) return;
+            if (confirm('Sair da sala?')) {
+                localStorage.removeItem('sala_ativa');
+                codigoSala = '';
+                participantes = [];
+                document.getElementById('codigoSala').textContent = '------';
+                document.getElementById('numPessoas').textContent = '0';
+                document.getElementById('rankingBox').style.display = 'none';
+                mostrarToast('🚪 Saiu da sala.');
+            }
+        }
+
+        function copiarCodigo() {
+            if (!codigoSala) { mostrarToast('⚠️ Crie ou entre em uma sala!'); return }
+            var t = '📚 Simulado PM-MA - Sala: ' + codigoSala;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(t).then(function() { mostrarToast('📋 Código copiado!') }).catch(function() {
+                    prompt('Copie o código:', codigoSala) });
+            } else { prompt('Copie o código:', codigoSala) }
+        }
+
+        function atualizarRanking() {
+            var el = document.getElementById('rankingList');
+            if (!participants || participants.length === 0) {
+                el.innerHTML = '<div style="color:#8899B0;font-size:13px;">Nenhum participante.</div>';
+                return;
+            }
+            var r = [];
+            for (var i = 0; i < participants.length; i++) {
+                var p = participants[i];
+                var c = 0,
+                    e = 0,
+                    t = 0,
+                    rs = p.respostas || {};
+                for (var j = 0; j < state.length; j++) {
+                    var q = state[j];
+                    if (rs[q.id] !== undefined) { t++; if (rs[q.id] === q.a) c++;
+                        else e++ }
+                }
+                var n = c - e;
+                r.push({ nome: p.nome, certas: c, erradas: e, total: t, nota: n });
+            }
+            r.sort(function(a, b) { if (b.nota !== a.nota) return b.nota - a.nota; return a.nome.localeCompare(b.nome) });
+            var h = '';
+            for (var k = 0; k < r.length; k++) {
+                var x = r[k];
+                var pc = '',
+                    m = (k + 1) + 'º';
+                if (k === 0) { pc = 'ouro';
+                    m = '🥇' } else if (k === 1) { pc = 'prata';
+                    m = '🥈' } else if (k === 2) { pc = 'bronze';
+                    m = '🥉' }
+                var est = (x.nome === meuNome) ? ' ⭐' : '';
+                h += '<div class="item"><span class="pos ' + pc + '">' + m + '</span><span class="nome">' + x.nome + est +
+                    '</span><span class="detalhes">✅' + x.certas + ' ❌' + x.erradas + '</span><span class="nota">' + x
+                    .nota + '</span></div>';
+            }
+            el.innerHTML = h;
+        }
+
+        // ============================================================
+        // INICIALIZAÇÃO
+        // ============================================================
+        function iniciarApp() {
+            var hasSaved = carregarProgresso();
+            if (!hasSaved || state.length === 0) {
+                setTimeout(function() { gerarSimulado() }, 100);
+            }
+            carregarSala();
+
+            // Switch Mobile/Desktop
+            document.getElementById('modoSwitch').addEventListener('change', function() {
+                var body = document.getElementById('body');
+                if (this.checked) {
+                    body.className = 'desktop';
+                } else {
+                    body.className = 'mobile';
+                }
+            });
+
+            document.getElementById('gerarBtn').addEventListener('click', function() {
+                if (state.length > 0) {
+                    var tem = false;
+                    for (var i = 0; i < state.length; i++) {
+                        if (state[i].answered) { tem = true; break; }
+                    }
+                    if (tem && !confirm('Gerar novo simulado vai resetar o progresso. Continuar?')) return;
+                }
+                gerarSimulado();
+            });
+
+            document.getElementById('criarSalaBtn').addEventListener('click', criarSala);
+            document.getElementById('entrarSalaBtn').addEventListener('click', entrarSala);
+            document.getElementById('sairSalaBtn').addEventListener('click', sairSala);
+
+            var filtros = document.querySelectorAll('.filtros button');
+            for (var f = 0; f < filtros.length; f++) {
+                filtros[f].addEventListener('click', function() {
+                    var b = document.querySelectorAll('.filtros button');
+                    for (var bb = 0; bb < b.length; bb++) { b[bb].className = '' }
+                    this.className = 'ativo';
+                    currentFilter = this.getAttribute('data-filtro');
+                    salvarProgresso();
+                    render();
+                });
+            }
+
+            document.getElementById('resetBtn').addEventListener('click', reiniciar);
+            document.getElementById('exportBtn').addEventListener('click', exportarDesempenho);
+            document.getElementById('codigoEntrada').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) { entrarSala() }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', iniciarApp);
+        } else {
+            iniciarApp();
+        }
+    </script>
+</body>
+</html>
