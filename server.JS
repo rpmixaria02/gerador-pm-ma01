@@ -36,20 +36,20 @@ const QUESTAO_LOCAL = [
 ];
 
 // ============================================================
-// ROTA: GERAR QUESTÕES (COM FALLBACK)
+// ROTA: GERAR QUESTÕES (COM GEMINI)
 // ============================================================
 app.post('/api/gerar', async (req, res) => {
     try {
         const { topico, quantidade } = req.body;
         const qtd = parseInt(quantidade) || 10;
-        const API_KEY = process.env.DEEPSEEK_API_KEY;
+        const API_KEY = process.env.GEMINI_API_KEY;
 
         console.log(`📝 Solicitado: ${qtd} questões sobre "${topico}"`);
-        console.log(`🔑 API Key configurada: ${API_KEY ? '✅ Sim' : '❌ Não'}`);
+        console.log(`🔑 Gemini API Key configurada: ${API_KEY ? '✅ Sim' : '❌ Não'}`);
 
         // SE NÃO TIVER CHAVE, USA O BANCO LOCAL
         if (!API_KEY) {
-            console.log('⚠️ Sem chave API. Usando banco local.');
+            console.log('⚠️ Sem chave Gemini. Usando banco local.');
             const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
                 success: true,
@@ -59,44 +59,48 @@ app.post('/api/gerar', async (req, res) => {
             });
         }
 
-        // ===== TENTAR CHAMAR A API DEEPSEEK =====
-        console.log('🔄 Chamando DeepSeek API...');
+        // ===== PROMPT PARA O GEMINI =====
+        const prompt = `Você é um professor de concurso público, especialista em questões estilo CEBRASPE (Certo/Errado).
 
-        const prompt = `Gere ${qtd} questões INÉDITAS no estilo CEBRASPE (Certo/Errado) sobre "${topico}".
-        
-        REGRAS:
-        1. Cada questão deve ser uma assertiva (frase curta de até 200 caracteres)
-        2. Deve ter uma "pegadinha" - uma palavra que torna a frase certa ou errada
-        3. Nível médio/difícil (igual à CEBRASPE)
-        
-        FORMATO DE RESPOSTA (JSON PURO):
-        [
-            {"c": "topico", "s": "assertiva", "a": true/false, "j": "justificativa curta"}
-        ]
-        
-        Responda APENAS com o JSON, sem texto adicional.`;
+Gere ${qtd} questões INÉDITAS sobre "${topico}".
 
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'deepseek-chat',
-                messages: [
-                    { role: 'system', content: 'Você é um especialista em concursos públicos. Responda apenas com JSON válido.' },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.8,
-                max_tokens: 4000
-            })
-        });
+REQUISITOS:
+1. Cada questão deve ser uma assertiva (frase curta de até 200 caracteres)
+2. Deve ter uma "pegadinha" - uma palavra que torna a frase certa ou errada
+3. Nível médio/difícil (igual à CEBRASPE)
+4. As questões devem ser NOVAS e ORIGINAIS - NUNCA repetir questões conhecidas
+5. Inclua questões fáceis, médias e difíceis
+6. As assertivas devem ser baseadas na legislação e doutrina corretas
+
+FORMATO DE RESPOSTA (JSON PURO):
+[
+    {"c": "topico", "s": "assertiva", "a": true/false, "j": "justificativa curta"}
+]
+
+Responda APENAS com o JSON, sem texto adicional.`;
+
+        console.log('🔄 Chamando Google Gemini API...');
+
+        // ===== CHAMAR O GEMINI =====
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }]
+                })
+            }
+        );
 
         // VERIFICAR SE A RESPOSTA É OK
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`❌ Erro na API (${response.status}):`, errorText);
+            console.error(`❌ Erro na API Gemini (${response.status}):`, errorText);
             
             // FALLBACK: usar banco local
             console.log('⚠️ Usando banco local (fallback)');
@@ -106,17 +110,22 @@ app.post('/api/gerar', async (req, res) => {
                 questoes: locais,
                 total: locais.length,
                 origem: 'local (fallback)',
-                erro: `API retornou ${response.status}`
+                erro: `Gemini retornou ${response.status}`
             });
         }
 
         const data = await response.json();
-        console.log('✅ Resposta da API recebida');
+        console.log('✅ Resposta da Gemini recebida');
 
         // ===== EXTRAIR O CONTEÚDO =====
         let conteudo = '';
         try {
-            conteudo = data.choices[0].message.content;
+            // Estrutura da resposta do Gemini
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                conteudo = data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Formato inesperado da resposta');
+            }
             console.log('📄 Conteúdo recebido (primeiros 200 chars):', conteudo.substring(0, 200));
         } catch (e) {
             console.error('❌ Erro ao extrair conteúdo:', e);
@@ -132,6 +141,7 @@ app.post('/api/gerar', async (req, res) => {
         // ===== LIMPAR E PARSEAR O JSON =====
         let questoes = [];
         try {
+            // Remover markdown e espaços extras
             const jsonStr = conteudo
                 .replace(/```json/g, '')
                 .replace(/```/g, '')
@@ -181,12 +191,12 @@ app.post('/api/gerar', async (req, res) => {
             });
         }
 
-        console.log(`✅ ${questoesValidas.length} questões geradas com sucesso!`);
+        console.log(`✅ ${questoesValidas.length} questões geradas com sucesso pelo Gemini!`);
         res.json({
             success: true,
             questoes: questoesValidas,
             total: questoesValidas.length,
-            origem: 'ia'
+            origem: 'gemini'
         });
 
     } catch (error) {
@@ -242,7 +252,7 @@ function gerarQuestoesLocais(topico, quantidade) {
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'online',
-        deepseek: process.env.DEEPSEEK_API_KEY ? 'configurado' : 'não configurado',
+        gemini: process.env.GEMINI_API_KEY ? '✅ configurado' : '❌ não configurado',
         local_questoes: QUESTAO_LOCAL.length
     });
 });
@@ -253,5 +263,5 @@ app.get('/api/status', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📡 Status: http://localhost:${PORT}/api/status`);
-    console.log(`🔑 DeepSeek: ${process.env.DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`🔑 Gemini: ${process.env.GEMINI_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
 });
