@@ -36,20 +36,20 @@ const QUESTAO_LOCAL = [
 ];
 
 // ============================================================
-// ROTA: GERAR QUESTÕES (COM GEMINI)
+// ROTA: GERAR QUESTÕES (COM GROQ)
 // ============================================================
 app.post('/api/gerar', async (req, res) => {
     try {
         const { topico, quantidade } = req.body;
         const qtd = parseInt(quantidade) || 10;
-        const API_KEY = process.env.GEMINI_API_KEY;
+        const API_KEY = process.env.GROQ_API_KEY;
 
         console.log(`📝 Solicitado: ${qtd} questões sobre "${topico}"`);
-        console.log(`🔑 Gemini API Key configurada: ${API_KEY ? '✅ Sim' : '❌ Não'}`);
+        console.log(`🔑 Groq API Key configurada: ${API_KEY ? '✅ Sim' : '❌ Não'}`);
 
         // SE NÃO TIVER CHAVE, USA O BANCO LOCAL
         if (!API_KEY) {
-            console.log('⚠️ Sem chave Gemini. Usando banco local.');
+            console.log('⚠️ Sem chave Groq. Usando banco local.');
             const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
                 success: true,
@@ -59,7 +59,7 @@ app.post('/api/gerar', async (req, res) => {
             });
         }
 
-        // ===== PROMPT PARA O GEMINI =====
+        // ===== PROMPT PARA O GROQ =====
         const prompt = `Você é um professor de concurso público, especialista em questões estilo CEBRASPE (Certo/Errado).
 
 Gere ${qtd} questões INÉDITAS sobre "${topico}".
@@ -68,9 +68,6 @@ REQUISITOS:
 1. Cada questão deve ser uma assertiva (frase curta de até 200 caracteres)
 2. Deve ter uma "pegadinha" - uma palavra que torna a frase certa ou errada
 3. Nível médio/difícil (igual à CEBRASPE)
-4. As questões devem ser NOVAS e ORIGINAIS - NUNCA repetir questões conhecidas
-5. Inclua questões fáceis, médias e difíceis
-6. As assertivas devem ser baseadas na legislação e doutrina corretas
 
 FORMATO DE RESPOSTA (JSON PURO):
 [
@@ -79,28 +76,30 @@ FORMATO DE RESPOSTA (JSON PURO):
 
 Responda APENAS com o JSON, sem texto adicional.`;
 
-        console.log('🔄 Chamando Google Gemini API...');
+        console.log('🔄 Chamando Groq API...');
 
-        // ===== CHAMAR O GEMINI =====
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }]
-                })
-            }
-        );
+        // ===== CHAMAR O GROQ =====
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    { role: 'system', content: 'Você é um especialista em concursos. Responda apenas com JSON válido.' },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.8,
+                max_tokens: 4000
+            })
+        });
 
         // VERIFICAR SE A RESPOSTA É OK
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`❌ Erro na API Gemini (${response.status}):`, errorText);
+            console.error(`❌ Erro na API Groq (${response.status}):`, errorText);
             
             // FALLBACK: usar banco local
             console.log('⚠️ Usando banco local (fallback)');
@@ -110,22 +109,17 @@ Responda APENAS com o JSON, sem texto adicional.`;
                 questoes: locais,
                 total: locais.length,
                 origem: 'local (fallback)',
-                erro: `Gemini retornou ${response.status}`
+                erro: `Groq retornou ${response.status}`
             });
         }
 
         const data = await response.json();
-        console.log('✅ Resposta da Gemini recebida');
+        console.log('✅ Resposta da Groq recebida');
 
         // ===== EXTRAIR O CONTEÚDO =====
         let conteudo = '';
         try {
-            // Estrutura da resposta do Gemini
-            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                conteudo = data.candidates[0].content.parts[0].text;
-            } else {
-                throw new Error('Formato inesperado da resposta');
-            }
+            conteudo = data.choices[0].message.content;
             console.log('📄 Conteúdo recebido (primeiros 200 chars):', conteudo.substring(0, 200));
         } catch (e) {
             console.error('❌ Erro ao extrair conteúdo:', e);
@@ -141,7 +135,6 @@ Responda APENAS com o JSON, sem texto adicional.`;
         // ===== LIMPAR E PARSEAR O JSON =====
         let questoes = [];
         try {
-            // Remover markdown e espaços extras
             const jsonStr = conteudo
                 .replace(/```json/g, '')
                 .replace(/```/g, '')
@@ -149,7 +142,6 @@ Responda APENAS com o JSON, sem texto adicional.`;
             questoes = JSON.parse(jsonStr);
         } catch (e) {
             console.error('❌ Erro ao parsear JSON:', e.message);
-            // FALLBACK: banco local
             const locais = gerarQuestoesLocais(topico, qtd);
             return res.json({
                 success: true,
@@ -191,18 +183,17 @@ Responda APENAS com o JSON, sem texto adicional.`;
             });
         }
 
-        console.log(`✅ ${questoesValidas.length} questões geradas com sucesso pelo Gemini!`);
+        console.log(`✅ ${questoesValidas.length} questões geradas com sucesso pelo Groq!`);
         res.json({
             success: true,
             questoes: questoesValidas,
             total: questoesValidas.length,
-            origem: 'gemini'
+            origem: 'groq'
         });
 
     } catch (error) {
         console.error('❌ Erro no servidor:', error);
         
-        // FALLBACK: banco local
         const topico = req.body.topico || 'geral';
         const qtd = parseInt(req.body.quantidade) || 10;
         const locais = gerarQuestoesLocais(topico, qtd);
@@ -252,7 +243,7 @@ function gerarQuestoesLocais(topico, quantidade) {
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'online',
-        gemini: process.env.GEMINI_API_KEY ? '✅ configurado' : '❌ não configurado',
+        groq: process.env.GROQ_API_KEY ? '✅ configurado' : '❌ não configurado',
         local_questoes: QUESTAO_LOCAL.length
     });
 });
@@ -263,5 +254,5 @@ app.get('/api/status', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📡 Status: http://localhost:${PORT}/api/status`);
-    console.log(`🔑 Gemini: ${process.env.GEMINI_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`🔑 Groq: ${process.env.GROQ_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
 });
