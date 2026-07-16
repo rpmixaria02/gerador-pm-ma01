@@ -142,23 +142,23 @@ Responda APENAS com o JSON, sem texto adicional.`;
 
         console.log('🔄 Chamando DeepSeek via OpenRouter (grátis)...');
 
-        // ===== CHAMAR DEEPSEEK VIA OPENROUTER (GRÁTIS) =====
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'deepseek/deepseek-v4-flash:free', // 🔥 MODELO GRÁTIS!
-                messages: [
-                    { role: 'system', content: 'Você é um especialista em concursos públicos da banca CEBRASPE. Responda apenas com JSON válido.' },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.7,
-                max_tokens: 4000
-            })
-        });
+     // ===== CHAMAR DEEPSEEK VIA OPENROUTER (MODELO ATUALIZADO) =====
+const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+        model: 'deepseek/deepseek-v3:free', // 🔥 MODELO ATUALIZADO!
+        messages: [
+            { role: 'system', content: 'Você é um especialista em concursos públicos da banca CEBRASPE. Responda apenas com JSON válido.' },
+            { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000
+    })
+});
 
         if (!response.ok) {
             const errorText = await response.text();
